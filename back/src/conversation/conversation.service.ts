@@ -62,16 +62,12 @@ export class ConversationService {
     return globalConversation;
   }
 
-  async createMessage(
-    userId: string,
-    conversationId: string,
-    createMessageDto: CreateMessageDto,
-  ) {
+  async createMessage(createMessageDto: CreateMessageDto) {
     const conversationMember = await this.prismaService.conversationMember.findUnique({
       where: {
         userId_conversationId: {
-          userId,
-          conversationId,
+          userId: createMessageDto.userId,
+          conversationId: createMessageDto.conversationId,
         },
       },
     });
@@ -86,31 +82,9 @@ export class ConversationService {
         conversationId,
         userId,
       },
-      include: {
-        user: {
-          omit: {
-            password: true,
-          },
-        },
-        Reaction: {
-          include: {
-            user: {
-              omit: {
-                password: true,
-              },
-            },
-            content: true,
-          },
-        },
-      },
     });
 
-    this.messagesGateway.handleNewMessage(conversationId, message);
-
-    const members = await this.prismaService.conversationMember.findMany({
-      where: { conversationId, userId: { not: userId } },
-      select: { userId: true },
-    });
+    await this.messagesGateway.handleNewMessage(conversationId, message);
 
     return message;
   }

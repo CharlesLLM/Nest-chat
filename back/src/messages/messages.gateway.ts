@@ -51,7 +51,9 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
     }
 
     try {
-      await this.conversationService.createMessage(userId, data.conversationId, {
+      await this.conversationService.createMessage({
+        userId: userId,
+        conversationId: data.conversationId,
         content: data.message,
       });
     } catch (error) {
